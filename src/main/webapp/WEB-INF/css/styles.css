@@ -1,0 +1,60 @@
+/* styles.css */
+
+/* Sidebar styling for deep blue and rounded log out button */
+.sidebar {
+    background: #221E87;
+}
+
+.sidebar .logo {
+    background: #e11d48; /* Tailwind's red-600 */
+}
+
+.sidebar .nav-link.active {
+    background: #2a3bab;
+    color: #fff;
+}
+
+.sidebar .logout-btn {
+    background: #fff;
+    color: #221E87;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: background 0.2s;
+}
+
+.sidebar .logout-btn:hover {
+    background: #f3f4f6;
+}
+
+.card {
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.06);
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.card .card-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.card.students { border-top: 3px solid #22c55e; }
+.card.teachers { border-top: 3px solid #3b82f6; }
+.card.earnings { border-top: 3px solid #ef4444; }
+
+/* Login page customizations */
+.login-bg {
+    background: linear-gradient(90deg, #fff 60%, #221E87 40%);
+}
+
+.login-box {
+    background: #f3f4f6;
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
+/* Responsive tweaks if needed */
+@media (max-width: 768px) {
+    .sidebar { width: 100%; min-width: 0; }
+    .main-content { padding: 1rem; }
+}

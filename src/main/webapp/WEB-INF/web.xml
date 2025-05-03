@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <display-name>Student Management System</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- Authentication Filter for protected routes -->
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>com.sms.filter.AuthenticationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/dashboard/*</url-pattern>
+        <url-pattern>/students/*</url-pattern>
+        <url-pattern>/teachers/*</url-pattern>
+        <url-pattern>/courses/*</url-pattern>
+        <url-pattern>/grades/*</url-pattern>
+        <url-pattern>/attendance/*</url-pattern>
+        <url-pattern>/settings/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Error Pages -->
+
+</web-app>
