@@ -3,14 +3,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Add Attendance - Frontier Institute</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 <div class="flex min-h-screen">
-<%@ include file="/WEB-INF/views/components/sidebar.jsp"%>
+
+    <%@ include file="/WEB-INF/views/components/sidebar.jsp" %>
     <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
-    <!-- Main Content -->
-        <h1>Crate inside this </h1>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col p-6">
+        <h1 class="text-2xl font-bold mb-4">Settings</h1>
+        <p>This is the Settings page</p>
     </div>
+</div>
+</body>
+</html>
