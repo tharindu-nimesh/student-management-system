@@ -25,62 +25,11 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen">
 <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 bg-primary-dark text-white">
-        <div class="p-4 bg-red-600">
-            <img src="${pageContext.request.contextPath}/images/logo.png" alt="Logo" class="h-10 inline-block">
-            <span class="font-bold ml-2">Nimna INSTITUTE</span>
-        </div>
-
-        <nav class="mt-6">
-            <a href="${pageContext.request.contextPath}/dashboard" class="flex items-center py-3 px-4 bg-primary">
-                <i class="fas fa-tachometer-alt w-6"></i>
-                <span>Dashboard</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/students" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-user-graduate w-6"></i>
-                <span>Students</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/teachers" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-chalkboard-teacher w-6"></i>
-                <span>Teachers</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/courses" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-book w-6"></i>
-                <span>Courses</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/grades" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-chart-bar w-6"></i>
-                <span>Grades</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/attendance" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-calendar-check w-6"></i>
-                <span>Attendance</span>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/settings" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-cog w-6"></i>
-                <span>Settings</span>
-            </a>
-        </nav>
-
-        <div class="absolute bottom-0 w-64 bg-primary-dark">
-            <a href="${pageContext.request.contextPath}/auth/logout" class="flex items-center py-3 px-4 hover:bg-primary transition duration-200">
-                <i class="fas fa-sign-out-alt w-6"></i>
-                <span>Log Out</span>
-            </a>
-        </div>
-    </div>
-
+    <%@ include file="components/sidebar.jsp" %>
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
         <!-- Top Navbar -->
         <header class="bg-white shadow">
             <div class="flex items-center justify-between p-4">
