@@ -25,11 +25,11 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen">
 <div class="flex h-screen">
     <%@ include file="components/sidebar.jsp" %>
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
         <!-- Top Navbar -->
         <header class="bg-white shadow">
             <div class="flex items-center justify-between p-4">
