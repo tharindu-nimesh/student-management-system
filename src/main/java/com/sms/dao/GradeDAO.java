@@ -154,4 +154,21 @@ public class GradeDAO {
         grade.setUpdatedAt(rs.getTimestamp("updated_at"));
         return grade;
     }
+
+    public List<Grade> getAllGrades() throws SQLException {
+        List<Grade> grades = new ArrayList<>();
+        String sql = "SELECT g.*, CONCAT(s.first_name, ' ', s.last_name) as student_name, c.course_name " +
+                "FROM grades g " +
+                "JOIN students s ON g.student_id = s.student_id " +
+                "JOIN courses c ON g.course_id = c.course_id " +
+                "ORDER BY g.grade_date DESC";
+        try (Statement statement = connection.createStatement()) {
+            ResultSet rs = statement.executeQuery(sql);
+            while (rs.next()) {
+                grades.add(extractGradeFromResultSet(rs));
+            }
+        }
+        return grades;
+    }
+
 }
