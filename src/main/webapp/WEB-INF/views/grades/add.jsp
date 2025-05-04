@@ -10,7 +10,7 @@
 <body class="bg-gray-100 min-h-screen">
 <div class="flex min-h-screen">
     <%@ include file="/WEB-INF/views/components/sidebar.jsp"%>
-        <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
+    <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
     <!-- Main Content -->
     <main class="flex-1 p-8">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-8">
