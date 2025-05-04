@@ -44,4 +44,9 @@ public class GradeService {
     public double getStudentCourseAverage(int studentId, int courseId) throws SQLException {
         return gradeDAO.getStudentCourseAverage(studentId, courseId);
     }
+
+    public List<Grade> getAllGrades() throws SQLException {
+        return gradeDAO.getAllGrades();
+    }
+
 }

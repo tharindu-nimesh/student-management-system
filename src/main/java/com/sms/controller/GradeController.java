@@ -92,9 +92,12 @@ public class GradeController extends HttpServlet {
         }
     }
 
-    private void listGrades(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void listGrades(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+        List<Grade> grades = gradeService.getAllGrades();
+        request.setAttribute("grades", grades);
         request.getRequestDispatcher("/WEB-INF/views/grades/list.jsp").forward(request, response);
     }
+
 
     private void showAddForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         List<Student> students = studentService.getAllStudents();
@@ -220,7 +223,7 @@ public class GradeController extends HttpServlet {
         request.setAttribute("student", student);
         request.setAttribute("grades", grades);
         request.setAttribute("courses", courses);
-        request.getRequestDispatcher("/WEB-INF/views/grades/student.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/grades/list.jsp").forward(request, response);
     }
 
     private void viewCourseGrades(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
@@ -232,6 +235,6 @@ public class GradeController extends HttpServlet {
         request.setAttribute("course", course);
         request.setAttribute("grades", grades);
         request.setAttribute("students", students);
-        request.getRequestDispatcher("/WEB-INF/views/grades/course.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/grades/list.jsp").forward(request, response);
     }
 }
