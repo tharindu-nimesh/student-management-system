@@ -51,10 +51,10 @@ public class StudentDAO {
     }
 
     public void deleteStudent(int studentId) throws SQLException {
-        String sql = "DELETE FROM students WHERE student_id=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, studentId);
-            statement.executeUpdate();
+        String sql = "DELETE FROM students WHERE student_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, studentId);
+            stmt.executeUpdate();
         }
     }
 
