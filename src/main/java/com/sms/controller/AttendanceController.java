@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,15 +64,13 @@ public class AttendanceController extends HttpServlet {
                     showTakeAttendanceForm(request, response);
                     break;
                 default:
-                    listAttendanceOptions(request, response);
+                    listAttendance(request, response);
                     break;
             }
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -93,17 +92,20 @@ public class AttendanceController extends HttpServlet {
                     takeAttendance(request, response);
                     break;
                 default:
-                    listAttendanceOptions(request, response);
+                    listAttendance(request, response);
                     break;
             }
         } catch (SQLException | ParseException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error processing request: " + e.getMessage());
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
         }
     }
 
-    private void listAttendanceOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void listAttendance(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
+        // Use the service to get all attendance records
+        List<Attendance> attendanceList = attendanceService.getAllAttendance();
+        request.setAttribute("attendanceList", attendanceList);
         request.getRequestDispatcher("/WEB-INF/views/attendance/list.jsp").forward(request, response);
     }
 
@@ -246,19 +248,33 @@ public class AttendanceController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/attendance/course.jsp").forward(request, response);
     }
 
-    private void viewDateAttendance(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException, ParseException {
+    private void viewDateAttendance(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String dateStr = request.getParameter("date");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
+        List<Attendance> attendanceList = new ArrayList<>();
 
-        if (dateStr != null && !dateStr.isEmpty()) {
-            date = sdf.parse(dateStr);
-        } else {
-            date = new Date(); // Use current date if no date provided
-            dateStr = sdf.format(date);
+        try {
+            if (dateStr != null && !dateStr.isEmpty()) {
+                try {
+                    date = sdf.parse(dateStr);
+                } catch (ParseException e) {
+                    // Log the error
+                    request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                    date = new Date(); // Use current date as fallback
+                    dateStr = sdf.format(date);
+                }
+            } else {
+                date = new Date(); // Use current date if no date provided
+                dateStr = sdf.format(date);
+            }
+
+            attendanceList = attendanceService.getAttendanceByDate(date);
+        } catch (SQLException e) {
+            // Log the database error
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
         }
-
-        List<Attendance> attendanceList = attendanceService.getAttendanceByDate(date);
 
         request.setAttribute("date", dateStr);
         request.setAttribute("attendanceList", attendanceList);
@@ -293,7 +309,6 @@ public class AttendanceController extends HttpServlet {
                 int studentId = Integer.parseInt(studentIdStr);
                 String statusParam = "status_" + studentId;
                 String remarksParam = "remarks_" + studentId;
-
                 String status = request.getParameter(statusParam);
                 String remarks = request.getParameter(remarksParam);
 
