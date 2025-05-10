@@ -8,15 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AttendanceDAO {
-    private Connection connection;
 
     public AttendanceDAO() {
-        connection = DBUtil.getConnection();
+        // No need to create a connection in constructor
     }
 
     public void addAttendance(Attendance attendance) throws SQLException {
         String sql = "INSERT INTO attendance (student_id, course_id, attendance_date, status, remarks) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setInt(1, attendance.getStudentId());
             statement.setInt(2, attendance.getCourseId());
             statement.setDate(3, new java.sql.Date(attendance.getAttendanceDate().getTime()));
@@ -33,7 +35,10 @@ public class AttendanceDAO {
 
     public void updateAttendance(Attendance attendance) throws SQLException {
         String sql = "UPDATE attendance SET student_id=?, course_id=?, attendance_date=?, status=?, remarks=? WHERE attendance_id=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, attendance.getStudentId());
             statement.setInt(2, attendance.getCourseId());
             statement.setDate(3, new java.sql.Date(attendance.getAttendanceDate().getTime()));
@@ -46,7 +51,10 @@ public class AttendanceDAO {
 
     public void deleteAttendance(int attendanceId) throws SQLException {
         String sql = "DELETE FROM attendance WHERE attendance_id=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, attendanceId);
             statement.executeUpdate();
         }
@@ -58,11 +66,16 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.attendance_id=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, attendanceId);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return extractAttendanceFromResultSet(rs);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return extractAttendanceFromResultSet(rs);
+                }
             }
         }
         return null;
@@ -74,13 +87,18 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.student_id=? AND a.course_id=? AND a.attendance_date=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, studentId);
             statement.setInt(2, courseId);
             statement.setDate(3, new java.sql.Date(date.getTime()));
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return extractAttendanceFromResultSet(rs);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return extractAttendanceFromResultSet(rs);
+                }
             }
         }
         return null;
@@ -93,11 +111,16 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.student_id=? ORDER BY a.attendance_date DESC";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, studentId);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                attendanceList.add(extractAttendanceFromResultSet(rs));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    attendanceList.add(extractAttendanceFromResultSet(rs));
+                }
             }
         }
         return attendanceList;
@@ -110,11 +133,16 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.course_id=? ORDER BY a.attendance_date DESC, s.last_name, s.first_name";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, courseId);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                attendanceList.add(extractAttendanceFromResultSet(rs));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    attendanceList.add(extractAttendanceFromResultSet(rs));
+                }
             }
         }
         return attendanceList;
@@ -127,11 +155,16 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.attendance_date=? ORDER BY c.course_name, s.last_name, s.first_name";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setDate(1, new java.sql.Date(date.getTime()));
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                attendanceList.add(extractAttendanceFromResultSet(rs));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    attendanceList.add(extractAttendanceFromResultSet(rs));
+                }
             }
         }
         return attendanceList;
@@ -144,12 +177,17 @@ public class AttendanceDAO {
                 "JOIN students s ON a.student_id = s.student_id " +
                 "JOIN courses c ON a.course_id = c.course_id " +
                 "WHERE a.student_id=? AND a.course_id=? ORDER BY a.attendance_date DESC";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, studentId);
             statement.setInt(2, courseId);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                attendanceList.add(extractAttendanceFromResultSet(rs));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    attendanceList.add(extractAttendanceFromResultSet(rs));
+                }
             }
         }
         return attendanceList;
@@ -160,19 +198,43 @@ public class AttendanceDAO {
                 "COUNT(*) as total, " +
                 "SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present " +
                 "FROM attendance WHERE student_id=? AND course_id=?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, studentId);
             statement.setInt(2, courseId);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                int total = rs.getInt("total");
-                int present = rs.getInt("present");
-                if (total > 0) {
-                    return ((double) present / total) * 100.0;
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total");
+                    int present = rs.getInt("present");
+                    if (total > 0) {
+                        return ((double) present / total) * 100.0;
+                    }
                 }
             }
         }
         return 0.0;
+    }
+
+    public List<Attendance> getAllAttendance() throws SQLException {
+        List<Attendance> attendanceList = new ArrayList<>();
+        String sql = "SELECT a.*, CONCAT(s.first_name, ' ', s.last_name) as student_name, c.course_name " +
+                "FROM attendance a " +
+                "JOIN students s ON a.student_id = s.student_id " +
+                "JOIN courses c ON a.course_id = c.course_id " +
+                "ORDER BY a.attendance_date DESC, s.last_name, s.first_name";
+
+        try (Connection connection = DBUtil.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                attendanceList.add(extractAttendanceFromResultSet(rs));
+            }
+        }
+        return attendanceList;
     }
 
     private Attendance extractAttendanceFromResultSet(ResultSet rs) throws SQLException {

@@ -53,4 +53,8 @@ public class AttendanceService {
     public double getStudentAttendancePercentage(int studentId, int courseId) throws SQLException {
         return attendanceDAO.getStudentAttendancePercentage(studentId, courseId);
     }
+
+    public List<Attendance> getAllAttendance() throws SQLException {
+        return attendanceDAO.getAllAttendance();
+    }
 }
