@@ -19,7 +19,7 @@
                 <h1 class="text-2xl font-bold">Courses</h1>
                 <p class="text-gray-500">Manage all courses</p>
             </div>
-            <a href="${pageContext.request.contextPath}/courses/new" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-semibold flex items-center">
+            <a href="${pageContext.request.contextPath}/courses/new" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold flex items-center">
                 <i class="fa fa-plus mr-2"></i> Add Course
             </a>
         </div>
