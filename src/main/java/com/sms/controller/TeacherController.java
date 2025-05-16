@@ -214,18 +214,40 @@ public class TeacherController extends HttpServlet {
         }
     }
 
-    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
         try {
             int teacherId = Integer.parseInt(request.getParameter("id"));
-            teacherService.deleteTeacher(teacherId);
 
-            // Set success attributes
-            request.setAttribute("successMessage", "Teacher was successfully deleted!");
+            // Fetch teacher details first
+            Teacher teacher = teacherService.getTeacherById(teacherId);
+            if (teacher == null) {
+                throw new Exception("Teacher not found.");
+            }
+
+            // Check if teacher is inactive
+            if (!teacher.isActive()) {
+                // Proceed with deletion
+                teacherService.deleteTeacher(teacherId);
+
+                // Set success attributes
+                request.setAttribute("successMessage", "Teacher was successfully deleted!");
+            } else {
+                // Teacher is active, cannot delete
+                request.setAttribute("errorMessage", "Cannot delete an active teacher. Please deactivate the teacher first.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
+                request.setAttribute("returnLabel", "Back to Teachers");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;  // exit method here
+            }
+
+            // Common return URL and label
             request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
             request.setAttribute("returnLabel", "Back to Teachers");
 
             // Forward to success page
             request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
         } catch (Exception e) {
             // Set error attributes
             request.setAttribute("errorMessage", "Failed to delete teacher: " + e.getMessage());
@@ -236,6 +258,7 @@ public class TeacherController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     private void viewTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int teacherId = Integer.parseInt(request.getParameter("id"));
