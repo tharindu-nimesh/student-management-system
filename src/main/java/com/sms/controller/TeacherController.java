@@ -87,12 +87,13 @@ public class TeacherController extends HttpServlet {
                     listTeachers(request, response);
                     break;
             }
-        } catch (SQLException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Error processing request: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
         }
     }
+
 
     private void listTeachers(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         List<Teacher> teachers = teacherService.getAllTeachers();
@@ -111,65 +112,87 @@ public class TeacherController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/teachers/edit.jsp").forward(request, response);
     }
 
-    private void addTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String department = request.getParameter("department");
+    private void addTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String department = request.getParameter("department");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date hireDate = null;
-        if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
-            hireDate = sdf.parse(request.getParameter("hireDate"));
-        } else {
-            hireDate = new Date(); // Use current date as default
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date hireDate = null;
+            if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
+                hireDate = sdf.parse(request.getParameter("hireDate"));
+            } else {
+                hireDate = new Date(); // Use current date as default
+            }
+
+            String status = request.getParameter("status");
+
+            Teacher teacher = new Teacher();
+            teacher.setFirstName(firstName);
+            teacher.setLastName(lastName);
+            teacher.setEmail(email);
+            teacher.setPhone(phone);
+            teacher.setDepartment(department);
+            teacher.setHireDate(hireDate);
+            teacher.setStatus(status);
+
+            teacherService.addTeacher(teacher);
+
+            // Redirect to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (SQLException | ParseException e) {
+            e.printStackTrace();
+            // Set error message and redirect to error page
+            request.setAttribute("errorMessage", "Error adding teacher: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
-
-        String status = request.getParameter("status");
-
-        Teacher teacher = new Teacher();
-        teacher.setFirstName(firstName);
-        teacher.setLastName(lastName);
-        teacher.setEmail(email);
-        teacher.setPhone(phone);
-        teacher.setDepartment(department);
-        teacher.setHireDate(hireDate);
-        teacher.setStatus(status);
-
-        teacherService.addTeacher(teacher);
-        response.sendRedirect(request.getContextPath() + "/teachers");
     }
 
-    private void updateTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        int teacherId = Integer.parseInt(request.getParameter("teacherId"));
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String department = request.getParameter("department");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date hireDate = null;
-        if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
-            hireDate = sdf.parse(request.getParameter("hireDate"));
+    private void updateTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int teacherId = Integer.parseInt(request.getParameter("teacherId"));
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String department = request.getParameter("department");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date hireDate = null;
+            if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
+                hireDate = sdf.parse(request.getParameter("hireDate"));
+            }
+
+            String status = request.getParameter("status");
+
+            Teacher teacher = new Teacher();
+            teacher.setTeacherId(teacherId);
+            teacher.setFirstName(firstName);
+            teacher.setLastName(lastName);
+            teacher.setEmail(email);
+            teacher.setPhone(phone);
+            teacher.setDepartment(department);
+            teacher.setHireDate(hireDate);
+            teacher.setStatus(status);
+
+            teacherService.updateTeacher(teacher);
+
+            // Redirect to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (SQLException | ParseException e) {
+            e.printStackTrace();
+            // Set error message and redirect to error page
+            request.setAttribute("errorMessage", "Error updating teacher: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
-
-        String status = request.getParameter("status");
-
-        Teacher teacher = new Teacher();
-        teacher.setTeacherId(teacherId);
-        teacher.setFirstName(firstName);
-        teacher.setLastName(lastName);
-        teacher.setEmail(email);
-        teacher.setPhone(phone);
-        teacher.setDepartment(department);
-        teacher.setHireDate(hireDate);
-        teacher.setStatus(status);
-
-        teacherService.updateTeacher(teacher);
-        response.sendRedirect(request.getContextPath() + "/teachers");
     }
+
 
     private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int teacherId = Integer.parseInt(request.getParameter("id"));
