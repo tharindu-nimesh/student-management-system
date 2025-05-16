@@ -8,18 +8,27 @@
 <body class="bg-green-50 min-h-screen flex items-center justify-center">
 <div class="bg-white shadow-lg rounded-xl p-10 text-center max-w-md w-full">
   <h1 class="text-3xl font-bold text-green-600 mb-4">Success!</h1>
+
+  <!-- Dynamic success message -->
   <p class="text-gray-700 mb-6">
-    ${empty successMessage ? "Teacher registration was successful." : successMessage}
+    ${empty successMessage ? "Operation completed successfully." : successMessage}
   </p>
+
+  <!-- Dynamic return links -->
   <div class="flex justify-center space-x-4">
-    <a href="${pageContext.request.contextPath}/teachers/new"
+    <!-- Primary action button -->
+    <a href="${empty returnUrl ? pageContext.request.contextPath : returnUrl}"
        class="text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded transition">
-      Register Another
+      ${empty returnLabel ? "Return" : returnLabel}
     </a>
-    <a href="${pageContext.request.contextPath}/teachers"
+
+    <!-- Secondary action button (optional) -->
+    <% if (request.getAttribute("secondaryUrl") != null) { %>
+    <a href="${secondaryUrl}"
        class="text-white bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded transition">
-      View All Teachers
+      ${empty secondaryLabel ? "View All" : secondaryLabel}
     </a>
+    <% } %>
   </div>
 </div>
 </body>

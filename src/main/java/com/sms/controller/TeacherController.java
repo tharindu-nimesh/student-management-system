@@ -94,7 +94,6 @@ public class TeacherController extends HttpServlet {
         }
     }
 
-
     private void listTeachers(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         List<Teacher> teachers = teacherService.getAllTeachers();
         request.setAttribute("teachers", teachers);
@@ -142,16 +141,24 @@ public class TeacherController extends HttpServlet {
             teacherService.addTeacher(teacher);
 
             // Redirect to success page
+            request.setAttribute("successMessage", "Teacher " + teacher.getFirstName() + " " + teacher.getLastName() + " was successfully added!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
+            request.setAttribute("returnLabel", "Add Another Teacher");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/teachers");
+            request.setAttribute("secondaryLabel", "View All Teachers");
+
+            // Forward to success page
             request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
 
-        } catch (SQLException | ParseException e) {
-            e.printStackTrace();
-            // Set error message and redirect to error page
-            request.setAttribute("errorMessage", "Error adding teacher: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Set error attributes
+            request.setAttribute("errorMessage", "Failed to add teacher: " + e.getMessage());
+            request.setAttribute("returnLabel", "Try Again");
+
+            // Forward to error page
+            request.getRequestDispatcher("src/main/webapp/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
-
 
     private void updateTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -183,21 +190,51 @@ public class TeacherController extends HttpServlet {
             teacherService.updateTeacher(teacher);
 
             // Redirect to success page
-            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+            request.setAttribute("successMessage", "Teacher information was successfully updated!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
+            request.setAttribute("returnLabel", "Back to Teachers");
 
-        } catch (SQLException | ParseException e) {
-            e.printStackTrace();
-            // Set error message and redirect to error page
-            request.setAttribute("errorMessage", "Error updating teacher: " + e.getMessage());
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Set error attributes
+            int teacherId = 0;
+            try {
+                teacherId = Integer.parseInt(request.getParameter("teacherId"));
+            } catch (NumberFormatException nfe) {
+                // Ignore, we'll use 0 if we can't parse the ID
+            }
+
+            request.setAttribute("errorMessage", "Failed to update teacher: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/edit?id=" + teacherId);
+            request.setAttribute("returnLabel", "Try Again");
+
+            // Forward to error page
             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
 
+    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+        try {
+            int teacherId = Integer.parseInt(request.getParameter("id"));
+            teacherService.deleteTeacher(teacherId);
 
-    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int teacherId = Integer.parseInt(request.getParameter("id"));
-        teacherService.deleteTeacher(teacherId);
-        response.sendRedirect(request.getContextPath() + "/teachers");
+            // Set success attributes
+            request.setAttribute("successMessage", "Teacher was successfully deleted!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
+            request.setAttribute("returnLabel", "Back to Teachers");
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Set error attributes
+            request.setAttribute("errorMessage", "Failed to delete teacher: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
+            request.setAttribute("returnLabel", "Back to Teachers");
+
+            // Forward to error page
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
 
     private void viewTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
@@ -225,14 +262,30 @@ public class TeacherController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/teachers/courses.jsp").forward(request, response);
     }
 
-    private void assignCourseToTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int teacherId = Integer.parseInt(request.getParameter("teacherId"));
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
+    private void assignCourseToTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+        try {
+            int teacherId = Integer.parseInt(request.getParameter("teacherId"));
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-        Course course = courseService.getCourseById(courseId);
-        course.setTeacherId(teacherId);
-        courseService.updateCourse(course);
+            Course course = courseService.getCourseById(courseId);
+            course.setTeacherId(teacherId);
+            courseService.updateCourse(course);
 
-        response.sendRedirect(request.getContextPath() + "/teachers/courses?id=" + teacherId);
+            // Set success attributes
+            request.setAttribute("successMessage", "Course was successfully assigned to teacher!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/courses?id=" + teacherId);
+            request.setAttribute("returnLabel", "View Teacher Courses");
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Set error attributes
+            request.setAttribute("errorMessage", "Failed to assign course to teacher: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");
+            request.setAttribute("returnLabel", "Back to Teachers");
+
+            // Forward to error page
+            request.getRequestDispatcher("src/main/webapp/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
 }
