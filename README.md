@@ -4,6 +4,57 @@ A full-featured Java web application for managing students, teachers, courses, a
 
 ## Project Structure
 
+student-management-system/
+│
+├── .idea/ # IntelliJ project settings (IDE-specific, optional)
+├── .mvn/wrapper/ # Maven wrapper scripts
+├── src/
+│ └── main/
+│ ├── java/
+│ │ └── com/sms/
+│ │ ├── controller/ # Servlets/controllers (e.g. StudentController.java)
+│ │ ├── dao/ # Data Access Objects (e.g. StudentDAO.java)
+│ │ ├── model/ # Entity classes (e.g. Student.java)
+│ │ ├── service/ # Business logic (e.g. StudentService.java)
+│ │ └── util/ # Utilities (e.g. DBUtil.java)
+│ ├── resources/
+│ │ └── db.properties # Database configuration
+│ └── webapp/
+│ ├── images/ # Static images (logo, etc.)
+│ ├── css/ # Custom CSS files
+│ └── WEB-INF/
+│ └── views/
+│ ├── dashboard.jsp
+│ └── students/
+│ ├── list.jsp
+│ ├── add.jsp
+│ ├── edit.jsp
+│ └── view.jsp
+│
+├── pom.xml # Maven build and dependency file
+├── README.md # Project documentation
+├── .gitignore # Git ignore file
+├── mvnw, mvnw.cmd # Maven wrapper scripts
+└── web.xml # Servlet configuration (if present)
+
+- **pom.xml**: Maven build file for dependencies, plugins, and project info.
+- **src/main/java**: All Java source code, organized by package.
+- **src/main/resources**: Resource/configuration files.
+- **src/main/webapp**: Web assets (JSPs, images, CSS, etc.).
+- **README.md**: Project documentation and setup instructions.
+
+---
+
+**Tip:**  
+If you want to auto-generate this in the future, you can use the `tree` command in your project root:
+
+Or use an online Markdown folder structure generator.
+
+---
+
+This structure will help anyone understand and navigate your project easily on GitHub.
+
+
 
 ## Prerequisites
 
