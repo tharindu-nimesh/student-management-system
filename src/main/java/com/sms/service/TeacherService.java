@@ -40,4 +40,21 @@ public class TeacherService {
     public int getTeacherCount() throws SQLException {
         return teacherDAO.getTeacherCount();
     }
+
+    public boolean isEmailExists(String email) throws SQLException {
+        return teacherDAO.isEmailExists(email);
+    }
+
+    public boolean isPhoneExists(String phone) throws SQLException {
+        return teacherDAO.isPhoneExists(phone);
+    }
+
+    public boolean isEmailExistsExcept(String email, int teacherId) throws SQLException {
+        return teacherDAO.isEmailExistsExcept(email, teacherId);
+    }
+
+    public boolean isPhoneExistsExcept(String phone, int teacherId) throws SQLException {
+        return teacherDAO.isPhoneExistsExcept(phone, teacherId);
+    }
+
 }

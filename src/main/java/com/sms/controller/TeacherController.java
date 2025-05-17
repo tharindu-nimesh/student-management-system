@@ -113,22 +113,51 @@ public class TeacherController extends HttpServlet {
 
     private void addTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Extract form data
             String firstName = request.getParameter("firstName");
             String lastName = request.getParameter("lastName");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
             String department = request.getParameter("department");
 
+            // Check for duplicate email
+            if (email != null && !email.isEmpty() && teacherService.isEmailExists(email)) {
+                request.setAttribute("errorMessage", "A teacher with this email already exists. Email addresses must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Check for duplicate phone
+            if (phone != null && !phone.isEmpty() && teacherService.isPhoneExists(phone)) {
+                request.setAttribute("errorMessage", "A teacher with this phone number already exists. Phone numbers must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Parse hire date
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date hireDate = null;
-            if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
-                hireDate = sdf.parse(request.getParameter("hireDate"));
-            } else {
-                hireDate = new Date(); // Use current date as default
+            try {
+                if (request.getParameter("hireDate") != null && !request.getParameter("hireDate").isEmpty()) {
+                    hireDate = sdf.parse(request.getParameter("hireDate"));
+                } else {
+                    hireDate = new Date(); // Use current date as default
+                }
+            } catch (ParseException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
             }
 
             String status = request.getParameter("status");
 
+            // Create teacher object
             Teacher teacher = new Teacher();
             teacher.setFirstName(firstName);
             teacher.setLastName(lastName);
@@ -138,6 +167,7 @@ public class TeacherController extends HttpServlet {
             teacher.setHireDate(hireDate);
             teacher.setStatus(status);
 
+            // Add teacher to database
             teacherService.addTeacher(teacher);
 
             // Redirect to success page
@@ -150,15 +180,21 @@ public class TeacherController extends HttpServlet {
             // Forward to success page
             request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
 
-        } catch (Exception e) {
-            // Set error attributes
-            request.setAttribute("errorMessage", "Failed to add teacher: " + e.getMessage());
+        } catch (SQLException e) {
+            // Set error attributes for database errors
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
             request.setAttribute("returnLabel", "Try Again");
-
-            // Forward to error page
-            request.getRequestDispatcher("src/main/webapp/WEB-INF/views/UX/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Set error attributes for other errors
+            request.setAttribute("errorMessage", "Failed to add teacher: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");
+            request.setAttribute("returnLabel", "Try Again");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     private void updateTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
