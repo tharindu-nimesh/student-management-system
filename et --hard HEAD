@@ -1,0 +1,128 @@
+[33mcommit e9709d7c9da79d766e3d0da9267e2a630dacd30c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mind/com[m[33m)[m
+Author: MaskINB <168406807+MaskINB@users.noreply.github.com>
+Date:   Fri May 16 11:54:57 2025 +0530
+
+    create the universel error handling pages
+
+[1mdiff --git a/src/main/java/com/sms/controller/TeacherController.java b/src/main/java/com/sms/controller/TeacherController.java[m
+[1mindex 04321c8..78327a5 100644[m
+[1m--- a/src/main/java/com/sms/controller/TeacherController.java[m
+[1m+++ b/src/main/java/com/sms/controller/TeacherController.java[m
+[36m@@ -94,7 +94,6 @@[m [mpublic class TeacherController extends HttpServlet {[m
+         }[m
+     }[m
+ [m
+[31m-[m
+     private void listTeachers(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {[m
+         List<Teacher> teachers = teacherService.getAllTeachers();[m
+         request.setAttribute("teachers", teachers);[m
+[36m@@ -142,17 +141,25 @@[m [mpublic class TeacherController extends HttpServlet {[m
+             teacherService.addTeacher(teacher);[m
+ [m
+             // Redirect to success page[m
+[32m+[m[32m            request.setAttribute("successMessage", "Teacher " + teacher.getFirstName() + " " + teacher.getLastName() + " was successfully added!");[m
+[32m+[m[32m            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/new");[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Add Another Teacher");[m
+[32m+[m[32m            request.setAttribute("secondaryUrl", request.getContextPath() + "/teachers");[m
+[32m+[m[32m            request.setAttribute("secondaryLabel", "View All Teachers");[m
+[32m+[m
+[32m+[m[32m            // Forward to success page[m
+             request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);[m
+ [m
+[31m-        } catch (SQLException | ParseException e) {[m
+[31m-            e.printStackTrace();[m
+[31m-            // Set error message and redirect to error page[m
+[31m-            request.setAttribute("errorMessage", "Error adding teacher: " + e.getMessage());[m
+[31m-            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);[m
+[32m+[m[32m        } catch (Exception e) {[m
+[32m+[m[32m            // Set error attributes[m
+[32m+[m[32m            request.setAttribute("errorMessage", "Failed to add teacher: " + e.getMessage());[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Try Again");[m
+[32m+[m
+[32m+[m[32m            // Forward to error page[m
+[32m+[m[32m            request.getRequestDispatcher("src/main/webapp/WEB-INF/views/UX/error.jsp").forward(request, response);[m
+         }[m
+     }[m
+ [m
+[31m-[m
+     private void updateTeacher(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {[m
+         try {[m
+             int teacherId = Integer.parseInt(request.getParameter("teacherId"));[m
+[36m@@ -183,21 +190,51 @@[m [mpublic class TeacherController extends HttpServlet {[m
+             teacherService.updateTeacher(teacher);[m
+ [m
+             // Redirect to success page[m
+[32m+[m[32m            request.setAttribute("successMessage", "Teacher information was successfully updated!");[m
+[32m+[m[32m            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Back to Teachers");[m
+[32m+[m
+[32m+[m[32m            // Forward to success page[m
+             request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);[m
+[32m+[m[32m        } catch (Exception e) {[m
+[32m+[m[32m            // Set error attributes[m
+[32m+[m[32m            int teacherId = 0;[m
+[32m+[m[32m            try {[m
+[32m+[m[32m                teacherId = Integer.parseInt(request.getParameter("teacherId"));[m
+[32m+[m[32m            } catch (NumberFormatException nfe) {[m
+[32m+[m[32m                // Ignore, we'll use 0 if we can't parse the ID[m
+[32m+[m[32m            }[m
+ [m
+[31m-        } catch (SQLException | ParseException e) {[m
+[31m-            e.printStackTrace();[m
+[31m-            // Set error message and redirect to error page[m
+[31m-            request.setAttribute("errorMessage", "Error updating teacher: " + e.getMessage());[m
+[32m+[m[32m            request.setAttribute("errorMessage", "Failed to update teacher: " + e.getMessage());[m
+[32m+[m[32m            request.setAttribute("returnUrl", request.getContextPath() + "/teachers/edit?id=" + teacherId);[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Try Again");[m
+[32m+[m
+[32m+[m[32m            // Forward to error page[m
+             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);[m
+         }[m
+     }[m
+ [m
+[32m+[m[32m    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            int teacherId = Integer.parseInt(request.getParameter("id"));[m
+[32m+[m[32m            teacherService.deleteTeacher(teacherId);[m
+ [m
+[31m-    private void deleteTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {[m
+[31m-        int teacherId = Integer.parseInt(request.getParameter("id"));[m
+[31m-        teacherService.deleteTeacher(teacherId);[m
+[31m-        response.sendRedirect(request.getContextPath() + "/teachers");[m
+[32m+[m[32m            // Set success attributes[m
+[32m+[m[32m            request.setAttribute("successMessage", "Teacher was successfully deleted!");[m
+[32m+[m[32m            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Back to Teachers");[m
+[32m+[m
+[32m+[m[32m            // Forward to success page[m
+[32m+[m[32m            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);[m
+[32m+[m[32m        } catch (Exception e) {[m
+[32m+[m[32m            // Set error attributes[m
+[32m+[m[32m            request.setAttribute("errorMessage", "Failed to delete teacher: " + e.getMessage());[m
+[32m+[m[32m            request.setAttribute("returnUrl", request.getContextPath() + "/teachers");[m
+[32m+[m[32m            request.setAttribute("returnLabel", "Back to Teachers");[m
+[32m+[m
+[32m+[m[32m            // Forward to error page[m
+[32m+[m[32m            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);[m
+[32m+[m[32m        }[m
+     }[m
+ [m
+     private void viewTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {[m
+[36m@@ -225,14 +262,30 @@[m [mpublic class TeacherController extends HttpServlet {[m
+         request.getRequestDispatcher("/WEB-INF/views/teachers/courses.jsp").forward(request, response);[m
+     }[m
+ [m
+[31m-    private void assignCourseToTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {[m
+[31m-        int teacherId = Integer.parseInt(request.getParameter("teacherId"));[m
+[31m-        int courseId = Integer.parseInt(request.getParameter("courseId"));[m
+[32m+[m[32m    private void assignCourseToTeacher(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            int teacherId = Integer.parseInt(request.getParameter("teacherId"));[m
+[32m+[m[32m            int courseId = Integer.parseInt(request.getParameter("courseId"));[m
+[32m+[m
+[32m+[m[32m            Course course = courseService.getCourseById(courseId);[m
+[32m+[m[32m            course.setTeacherId(teacherId);[m
+[32m+[m[32m            courseService.updateCourse(course);[m
+[32m+[m
+[32m+[m[32m            // Set success attributes[m
+[32m
