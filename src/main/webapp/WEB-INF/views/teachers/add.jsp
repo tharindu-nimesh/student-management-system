@@ -52,7 +52,9 @@
                 </div>
                 <div class="flex justify-end">
                     <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded mr-3">Reset</button>
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded">Save Teacher</button>
+                    <button type="submit" class="bg-[#3047D5] hover:bg-[#2536a9] text-white font-semibold py-2 px-6 rounded">
+                        Save Teacher
+                    </button>
                 </div>
             </form>
         </div>
