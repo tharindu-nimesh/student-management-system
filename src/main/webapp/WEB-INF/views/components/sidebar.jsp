@@ -9,7 +9,7 @@
         <!-- Logo & Title -->
         <div class="flex flex-col items-center px-6 py-8 bg-gradient-to-r from-indigo-600 to-indigo-800">
             <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white border-opacity-30 shadow-lg mb-3 transform transition-all hover:scale-110 duration-300">
-                <img src="${pageContext.request.contextPath}/images/logo.png" alt="Logo" class="h-full w-full object-cover">
+                <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Logo" class="h-full w-full object-cover">
             </div>
             <span class="text-white font-bold text-lg text-center">NIMNA INSTITUTE</span>
             <div class="h-1 w-16 bg-white bg-opacity-30 mt-3"></div>

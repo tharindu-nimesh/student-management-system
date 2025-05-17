@@ -89,7 +89,7 @@
 
             <div class="relative z-10 animate-fade-in">
                 <div class="float-animation mb-8">
-                    <img src="${pageContext.request.contextPath}/images/logo.png" alt="Frontier Institute Logo" class="w-28 h-28 mx-auto md:mx-0 shadow-lg rounded-2xl">
+                    <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Frontier Institute Logo" class="w-28 h-28 mx-auto md:mx-0 shadow-lg rounded-2xl">
                 </div>
                 <h1 class="text-white text-3xl md:text-4xl font-bold mt-4">NIMNA INSTITUTE</h1>
                 <div class="h-1 w-20 bg-white mx-auto md:mx-0 my-6"></div>
