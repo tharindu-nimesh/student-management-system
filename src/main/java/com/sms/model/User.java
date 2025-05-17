@@ -13,17 +13,22 @@ public class User {
     private Date createdAt;
     private Date updatedAt;
 
+    private String phone;   // new field
+    private String email;   // new field
+
     // Constructors
     public User() {}
 
     public User(int userId, String username, String password, String role,
-                int relatedId, String status) {
+                int relatedId, String status, String phone, String email) {
         this.userId = userId;
         this.username = username;
         this.password = password;
         this.role = role;
         this.relatedId = relatedId;
         this.status = status;
+        this.phone = phone;
+        this.email = email;
     }
 
     // Getters and Setters
@@ -99,6 +104,22 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -106,6 +127,8 @@ public class User {
                 ", username='" + username + '\'' +
                 ", role='" + role + '\'' +
                 ", status='" + status + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
                 '}';
     }
 }

@@ -15,13 +15,15 @@ public class UserDAO {
     }
 
     public void addUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (username, password, role, related_id, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, password, role, related_id, status, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
             statement.setInt(4, user.getRelatedId());
             statement.setString(5, user.getStatus());
+            statement.setString(6, user.getPhone());
+            statement.setString(7, user.getEmail());
             statement.executeUpdate();
 
             ResultSet generatedKeys = statement.getGeneratedKeys();
@@ -32,14 +34,16 @@ public class UserDAO {
     }
 
     public void updateUser(User user) throws SQLException {
-        String sql = "UPDATE users SET username=?, password=?, role=?, related_id=?, status=? WHERE user_id=?";
+        String sql = "UPDATE users SET username=?, password=?, role=?, related_id=?, status=?, phone=?, email=? WHERE user_id=?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole());
             statement.setInt(4, user.getRelatedId());
             statement.setString(5, user.getStatus());
-            statement.setInt(6, user.getUserId());
+            statement.setString(6, user.getPhone());
+            statement.setString(7, user.getEmail());
+            statement.setInt(8, user.getUserId());
             statement.executeUpdate();
         }
     }
@@ -87,6 +91,14 @@ public class UserDAO {
         }
         return users;
     }
+    public boolean updatePassword(int userId, String password) throws SQLException {
+        String sql = "UPDATE users SET password = ? WHERE user_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, password); // Consider hashing in production
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
 
     public List<User> getUsersByRole(String role) throws SQLException {
         List<User> users = new ArrayList<>();
@@ -129,6 +141,11 @@ public class UserDAO {
         user.setStatus(rs.getString("status"));
         user.setCreatedAt(rs.getTimestamp("created_at"));
         user.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+        // Set phone and email from ResultSet
+        user.setPhone(rs.getString("phone"));
+        user.setEmail(rs.getString("email"));
+
         return user;
     }
 }
