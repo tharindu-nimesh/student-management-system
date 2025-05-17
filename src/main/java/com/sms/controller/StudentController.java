@@ -214,10 +214,56 @@ public class StudentController extends HttpServlet {
 
 
 
-    private void deleteStudent(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        studentService.deleteStudent(id);
-        request.setAttribute("successMessage", "Student deleted successfully");
-        response.sendRedirect(request.getContextPath() + "/students");
+    private void deleteStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            studentService.deleteStudent(id);
+
+            // Set success attributes for universal success page
+            request.setAttribute("successMessage", "Student deleted successfully");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            // Forward to universal success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            // Handle invalid ID format
+            request.setAttribute("errorMessage", "Invalid student ID format.");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            // Handle SQL/database errors (e.g., foreign key constraint)
+            String message = e.getMessage();
+            if (message != null && message.contains("foreign key constraint fails")) {
+                request.setAttribute("errorMessage", "Cannot delete student: This student is enrolled in courses or has related records. Remove those first.");
+            } else {
+                request.setAttribute("errorMessage", "Database error: " + message);
+            }
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            // Handle any other unexpected errors
+            request.setAttribute("errorMessage", "Failed to delete student: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
+
 }
