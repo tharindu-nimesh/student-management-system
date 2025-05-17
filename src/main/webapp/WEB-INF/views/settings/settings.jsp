@@ -57,6 +57,11 @@
                     <input type="hidden" name="action" value="updatePassword" />
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Admin Username</label>
+                        <input type="text" name="adminUsername" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-600 focus:border-blue-600" required>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">New Password</label>
                         <input type="password" name="newPassword" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-600 focus:border-blue-600" required>
                     </div>
@@ -83,3 +88,4 @@
 </div>
 </body>
 </html>
+
