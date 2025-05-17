@@ -171,4 +171,20 @@ public class GradeDAO {
         return grades;
     }
 
+    public boolean isAssignmentExists(int studentId, int courseId, String assignmentName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM grades WHERE student_id = ? AND course_id = ? AND assignment_name = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentId);
+            statement.setInt(2, courseId);
+            statement.setString(3, assignmentName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+
 }

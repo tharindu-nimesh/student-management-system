@@ -122,22 +122,107 @@ public class GradeController extends HttpServlet {
 
     private void addGrade(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            int studentId = Integer.parseInt(request.getParameter("studentId"));
-            int courseId = Integer.parseInt(request.getParameter("courseId"));
-            String assignmentName = request.getParameter("assignmentName");
-            double gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
-            double maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
+            // Parse and validate student ID
+            int studentId;
+            try {
+                studentId = Integer.parseInt(request.getParameter("studentId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid student ID format");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
+            // Parse and validate course ID
+            int courseId;
+            try {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid course ID format");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Validate assignment name
+            String assignmentName = request.getParameter("assignmentName");
+            if (assignmentName == null || assignmentName.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Assignment name cannot be empty");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Check for duplicate assignment
+            if (gradeService.isAssignmentExists(studentId, courseId, assignmentName)) {
+                request.setAttribute("errorMessage", "A grade for this assignment already exists for this student and course");
+                request.setAttribute("returnUrl", request.getContextPath() + "/grades/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Parse and validate grade value
+            double gradeValue;
+            try {
+                gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
+                if (gradeValue < 0) {
+                    request.setAttribute("errorMessage", "Grade value cannot be negative");
+                    setErrorReturnAttributes(request);
+                    request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid grade value format");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Parse and validate max grade
+            double maxGrade;
+            try {
+                maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
+                if (maxGrade <= 0) {
+                    request.setAttribute("errorMessage", "Maximum grade must be greater than zero");
+                    setErrorReturnAttributes(request);
+                    request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                    return;
+                }
+
+                // Check if grade value exceeds max grade
+                if (gradeValue > maxGrade) {
+                    request.setAttribute("errorMessage", "Grade value cannot exceed maximum grade");
+                    setErrorReturnAttributes(request);
+                    request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid maximum grade format");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Parse and validate grade date
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date gradeDate = null;
-            if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
-                gradeDate = sdf.parse(request.getParameter("gradeDate"));
-            } else {
-                gradeDate = new Date(); // Use current date as default
+            Date gradeDate;
+            try {
+                if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
+                    gradeDate = sdf.parse(request.getParameter("gradeDate"));
+                } else {
+                    gradeDate = new Date(); // Use current date as default
+                }
+            } catch (ParseException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format for the grade date.");
+                setErrorReturnAttributes(request);
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
             }
 
             String comments = request.getParameter("comments");
 
+            // Create grade object
             Grade grade = new Grade();
             grade.setStudentId(studentId);
             grade.setCourseId(courseId);
@@ -147,11 +232,8 @@ public class GradeController extends HttpServlet {
             grade.setGradeDate(gradeDate);
             grade.setComments(comments);
 
+            // Add grade to database
             gradeService.addGrade(grade);
-
-            // Get student and course names for better messaging (optional)
-            String studentName = ""; // You could fetch this from a service if needed
-            String courseName = ""; // You could fetch this from a service if needed
 
             // Set success attributes
             request.setAttribute("successMessage", "Grade for assignment '" + assignmentName + "' was successfully added!");
@@ -193,19 +275,6 @@ public class GradeController extends HttpServlet {
             request.setAttribute("errorMessage", "Failed to add grade: " + e.getMessage());
             setErrorReturnAttributes(request);
             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
-
-        } catch (NumberFormatException e) {
-            // Handle invalid number format
-            request.setAttribute("errorMessage", "Invalid number format. Please ensure all numeric fields have valid values.");
-            setErrorReturnAttributes(request);
-            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
-
-        } catch (ParseException e) {
-            // Handle date parsing errors
-            request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format for the grade date.");
-            setErrorReturnAttributes(request);
-            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
-
         } catch (Exception e) {
             // Handle any other unexpected errors
             request.setAttribute("errorMessage", "An unexpected error occurred: " + e.getMessage());
@@ -213,6 +282,7 @@ public class GradeController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     // Helper method to set error return attributes
     private void setErrorReturnAttributes(HttpServletRequest request) {

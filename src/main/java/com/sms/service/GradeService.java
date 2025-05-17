@@ -50,4 +50,9 @@ public class GradeService {
         return gradeDAO.getAllGrades();
     }
 
+    public boolean isAssignmentExists(int studentId, int courseId, String assignmentName) throws SQLException {
+        return gradeDAO.isAssignmentExists(studentId, courseId, assignmentName);
+    }
+
+
 }
