@@ -85,7 +85,7 @@ public class GradeController extends HttpServlet {
                     listGrades(request, response);
                     break;
             }
-        } catch (SQLException | ParseException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Error processing request: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
@@ -120,81 +120,211 @@ public class GradeController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/grades/edit.jsp").forward(request, response);
     }
 
-    private void addGrade(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        int studentId = Integer.parseInt(request.getParameter("studentId"));
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
-        String assignmentName = request.getParameter("assignmentName");
-        double gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
-        double maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
+    private void addGrade(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int studentId = Integer.parseInt(request.getParameter("studentId"));
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            String assignmentName = request.getParameter("assignmentName");
+            double gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
+            double maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date gradeDate = null;
-        if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
-            gradeDate = sdf.parse(request.getParameter("gradeDate"));
-        } else {
-            gradeDate = new Date(); // Use current date as default
-        }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date gradeDate = null;
+            if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
+                gradeDate = sdf.parse(request.getParameter("gradeDate"));
+            } else {
+                gradeDate = new Date(); // Use current date as default
+            }
 
-        String comments = request.getParameter("comments");
+            String comments = request.getParameter("comments");
 
-        Grade grade = new Grade();
-        grade.setStudentId(studentId);
-        grade.setCourseId(courseId);
-        grade.setAssignmentName(assignmentName);
-        grade.setGradeValue(gradeValue);
-        grade.setMaxGrade(maxGrade);
-        grade.setGradeDate(gradeDate);
-        grade.setComments(comments);
+            Grade grade = new Grade();
+            grade.setStudentId(studentId);
+            grade.setCourseId(courseId);
+            grade.setAssignmentName(assignmentName);
+            grade.setGradeValue(gradeValue);
+            grade.setMaxGrade(maxGrade);
+            grade.setGradeDate(gradeDate);
+            grade.setComments(comments);
 
-        gradeService.addGrade(grade);
+            gradeService.addGrade(grade);
 
-        String redirectParam = request.getParameter("redirect");
-        if ("student".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/grades/student?id=" + studentId);
-        } else if ("course".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/grades/course?id=" + courseId);
-        } else {
-            response.sendRedirect(request.getContextPath() + "/grades");
+            // Get student and course names for better messaging (optional)
+            String studentName = ""; // You could fetch this from a service if needed
+            String courseName = ""; // You could fetch this from a service if needed
+
+            // Set success attributes
+            request.setAttribute("successMessage", "Grade for assignment '" + assignmentName + "' was successfully added!");
+
+            // Determine the return URL based on the redirect parameter
+            String redirectParam = request.getParameter("redirect");
+            String returnUrl;
+            String returnLabel;
+            String secondaryUrl;
+            String secondaryLabel;
+
+            if ("student".equals(redirectParam)) {
+                returnUrl = request.getContextPath() + "/grades/new?studentId=" + studentId;
+                returnLabel = "Add Another Grade for this Student";
+                secondaryUrl = request.getContextPath() + "/grades/student?id=" + studentId;
+                secondaryLabel = "View Student Grades";
+            } else if ("course".equals(redirectParam)) {
+                returnUrl = request.getContextPath() + "/grades/new?courseId=" + courseId;
+                returnLabel = "Add Another Grade for this Course";
+                secondaryUrl = request.getContextPath() + "/grades/course?id=" + courseId;
+                secondaryLabel = "View Course Grades";
+            } else {
+                returnUrl = request.getContextPath() + "/grades/new";
+                returnLabel = "Add Another Grade";
+                secondaryUrl = request.getContextPath() + "/grades";
+                secondaryLabel = "View All Grades";
+            }
+
+            request.setAttribute("returnUrl", returnUrl);
+            request.setAttribute("returnLabel", returnLabel);
+            request.setAttribute("secondaryUrl", secondaryUrl);
+            request.setAttribute("secondaryLabel", secondaryLabel);
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            // Set error attributes for database errors
+            request.setAttribute("errorMessage", "Failed to add grade: " + e.getMessage());
+            setErrorReturnAttributes(request);
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            // Handle invalid number format
+            request.setAttribute("errorMessage", "Invalid number format. Please ensure all numeric fields have valid values.");
+            setErrorReturnAttributes(request);
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (ParseException e) {
+            // Handle date parsing errors
+            request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format for the grade date.");
+            setErrorReturnAttributes(request);
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            // Handle any other unexpected errors
+            request.setAttribute("errorMessage", "An unexpected error occurred: " + e.getMessage());
+            setErrorReturnAttributes(request);
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
 
-    private void updateGrade(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        int gradeId = Integer.parseInt(request.getParameter("gradeId"));
-        int studentId = Integer.parseInt(request.getParameter("studentId"));
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
-        String assignmentName = request.getParameter("assignmentName");
-        double gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
-        double maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
+    // Helper method to set error return attributes
+    private void setErrorReturnAttributes(HttpServletRequest request) {
+        String redirectParam = request.getParameter("redirect");
+        String studentId = request.getParameter("studentId");
+        String courseId = request.getParameter("courseId");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date gradeDate = null;
-        if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
-            gradeDate = sdf.parse(request.getParameter("gradeDate"));
+        String returnUrl;
+        String secondaryUrl;
+
+        if ("student".equals(redirectParam) && studentId != null) {
+            returnUrl = request.getContextPath() + "/grades/new?studentId=" + studentId;
+            secondaryUrl = request.getContextPath() + "/grades/student?id=" + studentId;
+        } else if ("course".equals(redirectParam) && courseId != null) {
+            returnUrl = request.getContextPath() + "/grades/new?courseId=" + courseId;
+            secondaryUrl = request.getContextPath() + "/grades/course?id=" + courseId;
+        } else {
+            returnUrl = request.getContextPath() + "/grades/new";
+            secondaryUrl = request.getContextPath() + "/grades";
         }
 
-        String comments = request.getParameter("comments");
+        request.setAttribute("returnUrl", returnUrl);
+        request.setAttribute("returnLabel", "Try Again");
+        request.setAttribute("secondaryUrl", secondaryUrl);
+        request.setAttribute("secondaryLabel", "Back to Grades");
+    }
 
-        Grade grade = new Grade();
-        grade.setGradeId(gradeId);
-        grade.setStudentId(studentId);
-        grade.setCourseId(courseId);
-        grade.setAssignmentName(assignmentName);
-        grade.setGradeValue(gradeValue);
-        grade.setMaxGrade(maxGrade);
-        grade.setGradeDate(gradeDate);
-        grade.setComments(comments);
 
-        gradeService.updateGrade(grade);
+    private void updateGrade(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int gradeId = Integer.parseInt(request.getParameter("gradeId"));
+            int studentId = Integer.parseInt(request.getParameter("studentId"));
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            String assignmentName = request.getParameter("assignmentName");
+            double gradeValue = Double.parseDouble(request.getParameter("gradeValue"));
+            double maxGrade = Double.parseDouble(request.getParameter("maxGrade"));
 
-        String redirectParam = request.getParameter("redirect");
-        if ("student".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/grades/student?id=" + studentId);
-        } else if ("course".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/grades/course?id=" + courseId);
-        } else {
-            response.sendRedirect(request.getContextPath() + "/grades");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date gradeDate = null;
+            if (request.getParameter("gradeDate") != null && !request.getParameter("gradeDate").isEmpty()) {
+                gradeDate = sdf.parse(request.getParameter("gradeDate"));
+            }
+
+            String comments = request.getParameter("comments");
+
+            Grade grade = new Grade();
+            grade.setGradeId(gradeId);
+            grade.setStudentId(studentId);
+            grade.setCourseId(courseId);
+            grade.setAssignmentName(assignmentName);
+            grade.setGradeValue(gradeValue);
+            grade.setMaxGrade(maxGrade);
+            grade.setGradeDate(gradeDate);
+            grade.setComments(comments);
+
+            boolean success = gradeService.updateGrade(grade);
+
+            String redirectParam = request.getParameter("redirect");
+            String returnUrl;
+
+            if ("student".equals(redirectParam)) {
+                returnUrl = request.getContextPath() + "/grades/student?id=" + studentId;
+            } else if ("course".equals(redirectParam)) {
+                returnUrl = request.getContextPath() + "/grades/course?id=" + courseId;
+            } else {
+                returnUrl = request.getContextPath() + "/grades";
+            }
+
+            if (success) {
+                // Set success attributes
+                request.setAttribute("successMessage", "Grade updated successfully!");
+                request.setAttribute("returnUrl", returnUrl);
+                request.setAttribute("returnLabel", "Return to Grades");
+
+                // Optional secondary action
+                request.setAttribute("secondaryUrl", request.getContextPath() + "/dashboard");
+                request.setAttribute("secondaryLabel", "Back to Dashboard");
+
+                // Forward to success page
+                request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+            } else {
+                // Set error attributes
+                request.setAttribute("errorMessage", "Failed to update grade. Please try again.");
+                request.setAttribute("returnUrl", returnUrl);
+                request.setAttribute("returnLabel", "Try Again");
+
+                // Forward to error page
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+            }
+        } catch (NumberFormatException e) {
+            // Handle parsing errors
+            request.setAttribute("errorMessage", "Invalid number format: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/grades");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        } catch (ParseException e) {
+            // Handle date parsing errors
+            request.setAttribute("errorMessage", "Invalid date format: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/grades");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        } catch (SQLException e) {
+            // Handle database errors
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/grades");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Handle any other unexpected errors
+            request.setAttribute("errorMessage", "Unexpected error: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/grades");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     private void deleteGrade(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int gradeId = Integer.parseInt(request.getParameter("id"));

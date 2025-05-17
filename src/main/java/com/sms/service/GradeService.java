@@ -17,8 +17,9 @@ public class GradeService {
         gradeDAO.addGrade(grade);
     }
 
-    public void updateGrade(Grade grade) throws SQLException {
+    public boolean updateGrade(Grade grade) throws SQLException {
         gradeDAO.updateGrade(grade);
+        return false;
     }
 
     public void deleteGrade(int gradeId) throws SQLException {
