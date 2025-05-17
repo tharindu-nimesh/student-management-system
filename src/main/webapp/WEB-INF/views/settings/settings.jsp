@@ -80,7 +80,7 @@
                 <p><strong>Name:</strong> ${settings.instituteName}</p>
                 <p><strong>Academic Year:</strong> ${settings.academicYear}</p>
                 <div class="mt-4">
-                    <img src="${pageContext.request.contextPath}/images/logo.png"  alt="Logo" class="w-32 border rounded shadow" />
+                    <img src="${pageContext.request.contextPath}/images/logo.jpg"  alt="Logo" class="w-32 border rounded shadow" />
                 </div>
             </div>
         </main>
