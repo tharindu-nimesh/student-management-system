@@ -1,6 +1,5 @@
 package com.sms.service;
 
-
 import com.sms.dao.SettingsDAO;
 import com.sms.model.Settings;
 
@@ -27,5 +26,16 @@ public class SettingsService {
 
     public void updatePassword(int userId, String newPassword) throws SQLException {
         settingsDAO.updateUserPassword(userId, newPassword);
+    }
+
+    /**
+     * Update password by username.
+     * @param username the username of the admin
+     * @param newPassword the new password to set
+     * @return true if update successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean updatePasswordByUsername(String username, String newPassword) throws SQLException {
+        return settingsDAO.updateUserPasswordByUsername(username, newPassword);
     }
 }

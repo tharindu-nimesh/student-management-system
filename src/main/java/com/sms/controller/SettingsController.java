@@ -104,21 +104,32 @@ public class SettingsController extends HttpServlet {
 
     private void updatePassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            String username = request.getParameter("adminUsername");
             String newPassword = request.getParameter("newPassword");
+
+            if (username == null || username.trim().isEmpty()) {
+                throw new ServletException("Username cannot be empty.");
+            }
             if (newPassword == null || newPassword.trim().isEmpty()) {
                 throw new ServletException("Password cannot be empty.");
             }
 
-            // Optionally hash password here (recommended for production)
+            // TODO: Hash password here before storing for production
             // String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
 
-            // Get the admin user (assume ID 1 for admin user)
-            settingsService.updatePassword(1, newPassword);
+            boolean updated = settingsService.updatePasswordByUsername(username, newPassword);
 
-            request.setAttribute("successMessage", "Password updated successfully!");
-            request.setAttribute("returnUrl", request.getContextPath() + "/settings/view");
-            request.setAttribute("returnLabel", "Back to Settings");
-            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+            if (updated) {
+                request.setAttribute("successMessage", "Password updated successfully for user: " + username);
+                request.setAttribute("returnUrl", request.getContextPath() + "/settings/view");
+                request.setAttribute("returnLabel", "Back to Settings");
+                request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+            } else {
+                request.setAttribute("errorMessage", "User not found or password update failed for username: " + username);
+                request.setAttribute("returnUrl", request.getContextPath() + "/settings/view");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+            }
 
         } catch (SQLException | ServletException e) {
             request.setAttribute("errorMessage", "Failed to update password: " + e.getMessage());

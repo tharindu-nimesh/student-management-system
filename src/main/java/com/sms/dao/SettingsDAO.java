@@ -87,6 +87,15 @@ public class SettingsDAO {
             return ps.executeUpdate() > 0;
         }
     }
+    public boolean updateUserPasswordByUsername(String username, String newPassword) throws SQLException {
+        String sql = "UPDATE users SET password = ? WHERE username = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newPassword);  // Remember to hash passwords in production
+            ps.setString(2, username);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
 
     private Settings extractSettingsFromResultSet(ResultSet rs) throws SQLException {
         Settings s = new Settings();
