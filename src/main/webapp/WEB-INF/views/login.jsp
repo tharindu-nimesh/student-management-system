@@ -91,7 +91,7 @@
                 <div class="float-animation mb-8">
                     <img src="${pageContext.request.contextPath}/images/logo.png" alt="Frontier Institute Logo" class="w-28 h-28 mx-auto md:mx-0 shadow-lg rounded-2xl">
                 </div>
-                <h1 class="text-white text-3xl md:text-4xl font-bold mt-4">FRONTIER INSTITUTE</h1>
+                <h1 class="text-white text-3xl md:text-4xl font-bold mt-4">NIMNA INSTITUTE</h1>
                 <div class="h-1 w-20 bg-white mx-auto md:mx-0 my-6"></div>
                 <h2 class="text-white text-4xl md:text-5xl font-bold mt-6 animate-slide-up" style="animation-delay: 0.2s;">WELCOME</h2>
                 <p class="text-white text-xl mt-4 opacity-90 animate-slide-up" style="animation-delay: 0.4s;">Student Management System</p>
