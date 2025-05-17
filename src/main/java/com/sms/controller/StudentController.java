@@ -97,18 +97,50 @@ public class StudentController extends HttpServlet {
 
     private void addStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Extract key data for validation
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+
+            // Validate email uniqueness
+            if (email != null && !email.isEmpty() && studentService.isEmailExists(email)) {
+                request.setAttribute("errorMessage", "A student with this email already exists. Email addresses must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Validate phone uniqueness
+            if (phone != null && !phone.isEmpty() && studentService.isPhoneExists(phone)) {
+                request.setAttribute("errorMessage", "A student with this phone number already exists. Phone numbers must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
             // Extract form data and create a new student
             Student student = new Student();
             student.setFirstName(request.getParameter("firstName"));
             student.setLastName(request.getParameter("lastName"));
-            student.setEmail(request.getParameter("email"));
-            student.setPhone(request.getParameter("phone"));
-            student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
+            student.setEmail(email);
+            student.setPhone(phone);
+
+            try {
+                student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
+                student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
+            } catch (IllegalArgumentException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
             student.setAddress(request.getParameter("address"));
-            student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
             student.setStatus(request.getParameter("status"));
 
-            // Assuming studentService is already defined and initialized
+            // Add student to database
             studentService.addStudent(student);
 
             // Set success attributes
@@ -124,18 +156,14 @@ public class StudentController extends HttpServlet {
         } catch (SQLException e) {
             // Set error attributes
             request.setAttribute("errorMessage", "Failed to add student: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
             request.setAttribute("returnLabel", "Try Again");
 
             // Forward to error page
             request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
-
-        } catch (IllegalArgumentException e) {
-            // Handle invalid date format or other argument issues
-            request.setAttribute("errorMessage", "Invalid input: " + e.getMessage());
-            request.setAttribute("returnLabel", "Try Again");
-            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     private void updateStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
