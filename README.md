@@ -6,7 +6,7 @@
 
 A modern web application for managing student information, attendance, grades, and institutional operations in educational organizations.
 
-![Dashboard Preview](docs/screenshots/dashboard.png)  
+![Dashboard Preview](https://github.com/tharindu-nimesh/student-management-system/blob/73620fd422e8a4463cdcfcbb20a60c75b2903d0d/dashboard.png)  
 *Sample Dashboard Interface*
 
 ## 🌟 Features
