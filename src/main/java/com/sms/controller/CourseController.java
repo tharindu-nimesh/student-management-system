@@ -259,11 +259,45 @@ public class CourseController extends HttpServlet {
     }
 
 
-    private void deleteCourse(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int courseId = Integer.parseInt(request.getParameter("id"));
-        courseService.deleteCourse(courseId);
-        response.sendRedirect(request.getContextPath() + "/courses");
+    private void deleteCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int courseId = Integer.parseInt(request.getParameter("id"));
+            courseService.deleteCourse(courseId);
+
+            // Set success attributes
+            request.setAttribute("successMessage", "Course deleted successfully");
+            request.setAttribute("returnUrl", request.getContextPath() + "/courses");
+            request.setAttribute("returnLabel", "Back to Courses");
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            request.setAttribute("errorMessage", "Invalid course ID format.");
+            request.setAttribute("returnUrl", request.getContextPath() + "/courses");
+            request.setAttribute("returnLabel", "Back to Courses");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            String message = e.getMessage();
+            // Optionally, check for foreign key constraint error
+            if (message != null && message.contains("foreign key constraint fails")) {
+                request.setAttribute("errorMessage", "Cannot delete course: This course has enrolled students or related records. Remove those first.");
+            } else {
+                request.setAttribute("errorMessage", "Database error: " + message);
+            }
+            request.setAttribute("returnUrl", request.getContextPath() + "/courses");
+            request.setAttribute("returnLabel", "Back to Courses");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Failed to delete course: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/courses");
+            request.setAttribute("returnLabel", "Back to Courses");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
+
 
     private void viewCourse(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int courseId = Integer.parseInt(request.getParameter("id"));

@@ -48,13 +48,4 @@ public class TeacherService {
     public boolean isPhoneExists(String phone) throws SQLException {
         return teacherDAO.isPhoneExists(phone);
     }
-
-    public boolean isEmailExistsExcept(String email, int teacherId) throws SQLException {
-        return teacherDAO.isEmailExistsExcept(email, teacherId);
-    }
-
-    public boolean isPhoneExistsExcept(String phone, int teacherId) throws SQLException {
-        return teacherDAO.isPhoneExistsExcept(phone, teacherId);
-    }
-
 }
