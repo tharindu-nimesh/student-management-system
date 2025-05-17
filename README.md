@@ -1,20 +1,5 @@
 # Student Management System
 
-.
-├── .idea/
-├── .mvn/
-│   └── wrapper/
-├── .smarttomcat/student-management-system/components/
-├── src/
-│   └── main/
-├── .gitignore
-├── README.md
-├── et --hard HEAD
-├── mvnw
-├── mvnw.cmd
-└── pom.xml
-
-
 ## Prerequisites
 
 - Java 17 or newer
