@@ -169,4 +169,59 @@ public class StudentDAO {
         student.setUpdatedAt(rs.getTimestamp("updated_at"));
         return student;
     }
+
+    public boolean isEmailExists(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM students WHERE email = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isPhoneExists(String phone) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM students WHERE phone = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, phone);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isEmailExistsExcept(String email, int studentId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM students WHERE email = ? AND student_id != ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            statement.setInt(2, studentId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isPhoneExistsExcept(String phone, int studentId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM students WHERE phone = ? AND student_id != ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, phone);
+            statement.setInt(2, studentId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
 }

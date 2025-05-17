@@ -95,45 +95,175 @@ public class StudentController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/students/view.jsp").forward(request, response);
     }
 
-    private void addStudent(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        // Extract form data and create a new student
-        Student student = new Student();
-        student.setFirstName(request.getParameter("firstName"));
-        student.setLastName(request.getParameter("lastName"));
-        student.setEmail(request.getParameter("email"));
-        student.setPhone(request.getParameter("phone"));
-        student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
-        student.setAddress(request.getParameter("address"));
-        student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
-        student.setStatus(request.getParameter("status"));
+    private void addStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            // Extract key data for validation
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
 
-        studentService.addStudent(student);
-        request.setAttribute("successMessage", "Student added successfully");
-        response.sendRedirect(request.getContextPath() + "/students");
+            // Validate email uniqueness
+            if (email != null && !email.isEmpty() && studentService.isEmailExists(email)) {
+                request.setAttribute("errorMessage", "A student with this email already exists. Email addresses must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Validate phone uniqueness
+            if (phone != null && !phone.isEmpty() && studentService.isPhoneExists(phone)) {
+                request.setAttribute("errorMessage", "A student with this phone number already exists. Phone numbers must be unique.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            // Extract form data and create a new student
+            Student student = new Student();
+            student.setFirstName(request.getParameter("firstName"));
+            student.setLastName(request.getParameter("lastName"));
+            student.setEmail(email);
+            student.setPhone(phone);
+
+            try {
+                student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
+                student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
+            } catch (IllegalArgumentException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+                request.setAttribute("returnLabel", "Try Again");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            student.setAddress(request.getParameter("address"));
+            student.setStatus(request.getParameter("status"));
+
+            // Add student to database
+            studentService.addStudent(student);
+
+            // Set success attributes
+            request.setAttribute("successMessage", "Student " + student.getFirstName() + " " + student.getLastName() + " was successfully added!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("returnLabel", "Add Another Student");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students");
+            request.setAttribute("secondaryLabel", "View All Students");
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            // Set error attributes
+            request.setAttribute("errorMessage", "Failed to add student: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("returnLabel", "Try Again");
+
+            // Forward to error page
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
 
-    private void updateStudent(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        // Extract form data and update existing student
-        int id = Integer.parseInt(request.getParameter("studentId"));
-        Student student = studentService.getStudentById(id);
-        student.setFirstName(request.getParameter("firstName"));
-        student.setLastName(request.getParameter("lastName"));
-        student.setEmail(request.getParameter("email"));
-        student.setPhone(request.getParameter("phone"));
-        student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
-        student.setAddress(request.getParameter("address"));
-        student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
-        student.setStatus(request.getParameter("status"));
 
-        studentService.updateStudent(student);
-        request.setAttribute("successMessage", "Student updated successfully");
-        response.sendRedirect(request.getContextPath() + "/students");
+    private void updateStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            // Extract form data and update existing student
+            int id = Integer.parseInt(request.getParameter("studentId"));
+            Student student = studentService.getStudentById(id);
+
+            if (student == null) {
+                throw new Exception("Student not found.");
+            }
+
+            student.setFirstName(request.getParameter("firstName"));
+            student.setLastName(request.getParameter("lastName"));
+            student.setEmail(request.getParameter("email"));
+            student.setPhone(request.getParameter("phone"));
+            student.setDateOfBirth(java.sql.Date.valueOf(request.getParameter("dateOfBirth")));
+            student.setAddress(request.getParameter("address"));
+            student.setEnrollmentDate(java.sql.Date.valueOf(request.getParameter("enrollmentDate")));
+            student.setStatus(request.getParameter("status"));
+
+            studentService.updateStudent(student);
+
+            // Redirect to success page
+            request.setAttribute("successMessage", "Student information was successfully updated!");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+
+            // Forward to success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            // Set error attributes
+            int studentId = 0;
+            try {
+                studentId = Integer.parseInt(request.getParameter("studentId"));
+            } catch (NumberFormatException nfe) {
+                // Ignore, we'll use 0 if we can't parse the ID
+            }
+
+            request.setAttribute("errorMessage", "Failed to update student: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/students/edit?id=" + studentId);
+            request.setAttribute("returnLabel", "Try Again");
+
+            // Forward to error page
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
 
-    private void deleteStudent(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        studentService.deleteStudent(id);
-        request.setAttribute("successMessage", "Student deleted successfully");
-        response.sendRedirect(request.getContextPath() + "/students");
+
+
+    private void deleteStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            studentService.deleteStudent(id);
+
+            // Set success attributes for universal success page
+            request.setAttribute("successMessage", "Student deleted successfully");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            // Forward to universal success page
+            request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            // Handle invalid ID format
+            request.setAttribute("errorMessage", "Invalid student ID format.");
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            // Handle SQL/database errors (e.g., foreign key constraint)
+            String message = e.getMessage();
+            if (message != null && message.contains("foreign key constraint fails")) {
+                request.setAttribute("errorMessage", "Cannot delete student: This student is enrolled in courses or has related records. Remove those first.");
+            } else {
+                request.setAttribute("errorMessage", "Database error: " + message);
+            }
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            // Handle any other unexpected errors
+            request.setAttribute("errorMessage", "Failed to delete student: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/students");
+            request.setAttribute("returnLabel", "Back to Students");
+            request.setAttribute("secondaryUrl", request.getContextPath() + "/students/new");
+            request.setAttribute("secondaryLabel", "Add New Student");
+
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+        }
     }
+
 }

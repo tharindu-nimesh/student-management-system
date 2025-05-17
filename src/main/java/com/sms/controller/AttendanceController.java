@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,15 +64,13 @@ public class AttendanceController extends HttpServlet {
                     showTakeAttendanceForm(request, response);
                     break;
                 default:
-                    listAttendanceOptions(request, response);
+                    listAttendance(request, response);
                     break;
             }
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -93,17 +92,20 @@ public class AttendanceController extends HttpServlet {
                     takeAttendance(request, response);
                     break;
                 default:
-                    listAttendanceOptions(request, response);
+                    listAttendance(request, response);
                     break;
             }
         } catch (SQLException | ParseException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error processing request: " + e.getMessage());
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
         }
     }
 
-    private void listAttendanceOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void listAttendance(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
+        // Use the service to get all attendance records
+        List<Attendance> attendanceList = attendanceService.getAllAttendance();
+        request.setAttribute("attendanceList", attendanceList);
         request.getRequestDispatcher("/WEB-INF/views/attendance/list.jsp").forward(request, response);
     }
 
@@ -128,77 +130,240 @@ public class AttendanceController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/attendance/edit.jsp").forward(request, response);
     }
 
-    private void addAttendance(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        int studentId = Integer.parseInt(request.getParameter("studentId"));
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
+    private void addAttendance(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            // Parse student ID with validation
+            int studentId;
+            try {
+                studentId = Integer.parseInt(request.getParameter("studentId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid student ID format");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date attendanceDate = null;
-        if (request.getParameter("attendanceDate") != null && !request.getParameter("attendanceDate").isEmpty()) {
-            attendanceDate = sdf.parse(request.getParameter("attendanceDate"));
-        } else {
-            attendanceDate = new Date(); // Use current date as default
-        }
+            // Parse course ID with validation
+            int courseId;
+            try {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid course ID format");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        String status = request.getParameter("status");
-        String remarks = request.getParameter("remarks");
+            // Parse date with validation
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date attendanceDate;
+            try {
+                if (request.getParameter("attendanceDate") != null && !request.getParameter("attendanceDate").isEmpty()) {
+                    attendanceDate = sdf.parse(request.getParameter("attendanceDate"));
+                } else {
+                    attendanceDate = new Date(); // Use current date as default
+                }
+            } catch (ParseException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        Attendance attendance = new Attendance();
-        attendance.setStudentId(studentId);
-        attendance.setCourseId(courseId);
-        attendance.setAttendanceDate(attendanceDate);
-        attendance.setStatus(status);
-        attendance.setRemarks(remarks);
+            // Validate status
+            String status = request.getParameter("status");
+            if (status == null || status.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Attendance status cannot be empty");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        attendanceService.addAttendance(attendance);
+            String remarks = request.getParameter("remarks");
 
-        String redirectParam = request.getParameter("redirect");
-        if ("student".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/student?id=" + studentId);
-        } else if ("course".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/course?id=" + courseId);
-        } else if ("date".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/date?date=" + sdf.format(attendanceDate));
-        } else {
-            response.sendRedirect(request.getContextPath() + "/attendance");
+            // Create and set attendance object
+            Attendance attendance = new Attendance();
+            attendance.setStudentId(studentId);
+            attendance.setCourseId(courseId);
+            attendance.setAttendanceDate(attendanceDate);
+            attendance.setStatus(status);
+            attendance.setRemarks(remarks);
+
+            // Add attendance with service
+            try {
+                attendanceService.addAttendance(attendance);
+
+                // Set success attributes
+                request.setAttribute("successMessage", "Attendance record added successfully");
+
+                // Determine redirect URL based on the redirect parameter
+                String redirectParam = request.getParameter("redirect");
+                String returnUrl;
+                String secondaryUrl = request.getContextPath() + "/attendance";
+                String secondaryLabel = "View All Attendance";
+
+                if ("student".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/student?id=" + studentId;
+                    request.setAttribute("returnLabel", "Back to Student Attendance");
+                } else if ("course".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/course?id=" + courseId;
+                    request.setAttribute("returnLabel", "Back to Course Attendance");
+                } else if ("date".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/date?date=" + sdf.format(attendanceDate);
+                    request.setAttribute("returnLabel", "Back to Date Attendance");
+                } else {
+                    returnUrl = request.getContextPath() + "/attendance";
+                    request.setAttribute("returnLabel", "Back to Attendance");
+                }
+
+                request.setAttribute("returnUrl", returnUrl);
+                request.setAttribute("secondaryUrl", secondaryUrl);
+                request.setAttribute("secondaryLabel", secondaryLabel);
+
+                request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+            } catch (SQLException e) {
+                // Handle database errors
+                request.setAttribute("errorMessage", "Database error: " + e.getMessage());
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.setAttribute("secondaryUrl", request.getContextPath() + "/dashboard");
+                request.setAttribute("secondaryLabel", "Back to Dashboard");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+            }
+
+        } catch (Exception e) {
+            // Catch any other unexpected errors
+            request.setAttribute("errorMessage", "An unexpected error occurred: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
 
-    private void updateAttendance(HttpServletRequest request, HttpServletResponse response) throws SQLException, ParseException, IOException {
-        int attendanceId = Integer.parseInt(request.getParameter("attendanceId"));
-        int studentId = Integer.parseInt(request.getParameter("studentId"));
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date attendanceDate = null;
-        if (request.getParameter("attendanceDate") != null && !request.getParameter("attendanceDate").isEmpty()) {
-            attendanceDate = sdf.parse(request.getParameter("attendanceDate"));
-        }
+    private void updateAttendance(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            // Parse attendance ID with validation
+            int attendanceId;
+            try {
+                attendanceId = Integer.parseInt(request.getParameter("attendanceId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid attendance ID format");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        String status = request.getParameter("status");
-        String remarks = request.getParameter("remarks");
+            // Parse student ID with validation
+            int studentId;
+            try {
+                studentId = Integer.parseInt(request.getParameter("studentId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid student ID format");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        Attendance attendance = new Attendance();
-        attendance.setAttendanceId(attendanceId);
-        attendance.setStudentId(studentId);
-        attendance.setCourseId(courseId);
-        attendance.setAttendanceDate(attendanceDate);
-        attendance.setStatus(status);
-        attendance.setRemarks(remarks);
+            // Parse course ID with validation
+            int courseId;
+            try {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid course ID format");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        attendanceService.updateAttendance(attendance);
+            // Parse date with validation
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date attendanceDate;
+            try {
+                if (request.getParameter("attendanceDate") != null && !request.getParameter("attendanceDate").isEmpty()) {
+                    attendanceDate = sdf.parse(request.getParameter("attendanceDate"));
+                } else {
+                    request.setAttribute("errorMessage", "Attendance date is required");
+                    request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                    request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                    return;
+                }
+            } catch (ParseException e) {
+                request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
 
-        String redirectParam = request.getParameter("redirect");
-        if ("student".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/student?id=" + studentId);
-        } else if ("course".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/course?id=" + courseId);
-        } else if ("date".equals(redirectParam)) {
-            response.sendRedirect(request.getContextPath() + "/attendance/date?date=" + sdf.format(attendanceDate));
-        } else {
-            response.sendRedirect(request.getContextPath() + "/attendance");
+            // Validate status
+            String status = request.getParameter("status");
+            if (status == null || status.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Attendance status cannot be empty");
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+                return;
+            }
+
+            String remarks = request.getParameter("remarks");
+
+            // Create and set attendance object
+            Attendance attendance = new Attendance();
+            attendance.setAttendanceId(attendanceId);
+            attendance.setStudentId(studentId);
+            attendance.setCourseId(courseId);
+            attendance.setAttendanceDate(attendanceDate);
+            attendance.setStatus(status);
+            attendance.setRemarks(remarks);
+
+            // Update attendance with service
+            try {
+                attendanceService.updateAttendance(attendance);
+
+                // Set success attributes
+                request.setAttribute("successMessage", "Attendance record updated successfully");
+
+                // Determine redirect URL based on the redirect parameter
+                String redirectParam = request.getParameter("redirect");
+                String returnUrl;
+                String secondaryUrl = request.getContextPath() + "/attendance";
+                String secondaryLabel = "View All Attendance";
+
+                if ("student".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/student?id=" + studentId;
+                    request.setAttribute("returnLabel", "Back to Student Attendance");
+                } else if ("course".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/course?id=" + courseId;
+                    request.setAttribute("returnLabel", "Back to Course Attendance");
+                } else if ("date".equals(redirectParam)) {
+                    returnUrl = request.getContextPath() + "/attendance/date?date=" + sdf.format(attendanceDate);
+                    request.setAttribute("returnLabel", "Back to Date Attendance");
+                } else {
+                    returnUrl = request.getContextPath() + "/attendance";
+                    request.setAttribute("returnLabel", "Back to Attendance");
+                }
+
+                request.setAttribute("returnUrl", returnUrl);
+                request.setAttribute("secondaryUrl", secondaryUrl);
+                request.setAttribute("secondaryLabel", secondaryLabel);
+
+                request.getRequestDispatcher("/WEB-INF/views/UX/success.jsp").forward(request, response);
+
+            } catch (SQLException e) {
+                // Handle database errors
+                request.setAttribute("errorMessage", "Database error while updating attendance: " + e.getMessage());
+                request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+                request.setAttribute("secondaryUrl", request.getContextPath() + "/dashboard");
+                request.setAttribute("secondaryLabel", "Back to Dashboard");
+                request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
+            }
+
+        } catch (Exception e) {
+            // Catch any other unexpected errors
+            request.setAttribute("errorMessage", "An unexpected error occurred: " + e.getMessage());
+            request.setAttribute("returnUrl", request.getContextPath() + "/attendance");
+            request.getRequestDispatcher("/WEB-INF/views/UX/error.jsp").forward(request, response);
         }
     }
+
 
     private void deleteAttendance(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int attendanceId = Integer.parseInt(request.getParameter("id"));
@@ -246,19 +411,33 @@ public class AttendanceController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/attendance/course.jsp").forward(request, response);
     }
 
-    private void viewDateAttendance(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException, ParseException {
+    private void viewDateAttendance(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String dateStr = request.getParameter("date");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
+        List<Attendance> attendanceList = new ArrayList<>();
 
-        if (dateStr != null && !dateStr.isEmpty()) {
-            date = sdf.parse(dateStr);
-        } else {
-            date = new Date(); // Use current date if no date provided
-            dateStr = sdf.format(date);
+        try {
+            if (dateStr != null && !dateStr.isEmpty()) {
+                try {
+                    date = sdf.parse(dateStr);
+                } catch (ParseException e) {
+                    // Log the error
+                    request.setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD format.");
+                    date = new Date(); // Use current date as fallback
+                    dateStr = sdf.format(date);
+                }
+            } else {
+                date = new Date(); // Use current date if no date provided
+                dateStr = sdf.format(date);
+            }
+
+            attendanceList = attendanceService.getAttendanceByDate(date);
+        } catch (SQLException e) {
+            // Log the database error
+            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
         }
-
-        List<Attendance> attendanceList = attendanceService.getAttendanceByDate(date);
 
         request.setAttribute("date", dateStr);
         request.setAttribute("attendanceList", attendanceList);
@@ -293,7 +472,6 @@ public class AttendanceController extends HttpServlet {
                 int studentId = Integer.parseInt(studentIdStr);
                 String statusParam = "status_" + studentId;
                 String remarksParam = "remarks_" + studentId;
-
                 String status = request.getParameter(statusParam);
                 String remarks = request.getParameter(remarksParam);
 

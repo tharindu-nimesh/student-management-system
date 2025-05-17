@@ -124,4 +124,8 @@ public class Teacher {
                 ", department='" + department + '\'' +
                 '}';
     }
+
+    public boolean isActive() {
+        return status != null && status.equalsIgnoreCase("active");
+    }
 }

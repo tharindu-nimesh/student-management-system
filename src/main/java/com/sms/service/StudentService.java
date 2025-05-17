@@ -52,4 +52,21 @@ public class StudentService {
     public List<Student> getRecentStudents(int limit) throws SQLException {
         return studentDAO.getRecentStudents(limit);
     }
+
+    public boolean isEmailExists(String email) throws SQLException {
+        return studentDAO.isEmailExists(email);
+    }
+
+    public boolean isPhoneExists(String phone) throws SQLException {
+        return studentDAO.isPhoneExists(phone);
+    }
+
+    public boolean isEmailExistsExcept(String email, int studentId) throws SQLException {
+        return studentDAO.isEmailExistsExcept(email, studentId);
+    }
+
+    public boolean isPhoneExistsExcept(String phone, int studentId) throws SQLException {
+        return studentDAO.isPhoneExistsExcept(phone, studentId);
+    }
+
 }
