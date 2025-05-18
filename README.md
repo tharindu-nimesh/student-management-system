@@ -115,7 +115,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
   <a href="https://github.com/tharindunimesh">
-    <img src="https://img.shields.io/badge/GitHub-tharindunimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
+    <img src="https://img.shields.io/badge/GitHub-tharindu-nimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
   </a>
 
 Issue Tracker: [GitHub Issues](https://github.com/tharindu-nimesh/student-management-system/issues)
