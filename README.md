@@ -87,8 +87,8 @@ cp target/student-management-system.war $TOMCAT_HOME/webapps/
 Visit `http://localhost:8080/student-management-system`
 
 **Default Credentials**  
-- Admin: `admin@nimna.edu` / `Admin@123`  
-- Teacher: `teacher@nimna.edu` / `Teach@123`  
+- Admin: `admin` / `admin123`  
+- Teacher: `teacher` / `teacher123`  
 
 ## 🛡 Security Best Practices
 - BCrypt password hashing
