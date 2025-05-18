@@ -8,22 +8,53 @@
     <title>Attendance - Frontier Institute</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3047D5',
+                            dark: '#2a3bab',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 <div class="flex min-h-screen">
-    <%@ include file="/WEB-INF/views/components/sidebar.jsp"%>
+    <%@ include file="/WEB-INF/views/components/sidebar.jsp" %>
     <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
-        <!-- Main Content -->
-        <main class="flex-1 p-8">
-            <div class="flex justify-between items-center mb-6">
+
+        <!-- Top Navbar -->
+        <header class="bg-white shadow">
+            <div class="flex items-center justify-between p-4">
                 <div>
-                    <h1 class="text-2xl font-bold">Attendance</h1>
-                    <p class="text-gray-500">View and manage attendance records</p>
+                    <h1 class="text-xl font-bold">Attendance</h1>
+                    <p class="text-sm text-gray-600">View and manage attendance records</p>
                 </div>
-                <a href="${pageContext.request.contextPath}/attendance/new" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold flex items-center">
-                    <i class="fa fa-plus mr-2"></i> Add Attendance
-                </a>
+
+                <div class="flex">
+                    <div class="relative mr-4">
+                        <form action="${pageContext.request.contextPath}/attendance/search" method="get">
+                            <input type="text" name="searchTerm" value="${searchTerm}" placeholder="Search"
+                                   class="pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <button type="submit" class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/attendance/new"
+                       class="bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-plus mr-2"></i> Add Attendance
+                    </a>
+                </div>
             </div>
+        </header>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
             <div class="bg-white rounded-lg shadow p-6">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
@@ -57,8 +88,12 @@
                             </td>
                             <td class="px-4 py-3">${attendance.remarks}</td>
                             <td class="px-4 py-3">
-                                <a href="${pageContext.request.contextPath}/attendance/edit?id=${attendance.attendanceId}" class="text-blue-600 hover:underline mr-3"><i class="fa fa-edit"></i> Edit</a>
-                                <a href="${pageContext.request.contextPath}/attendance/delete?id=${attendance.attendanceId}" class="text-red-600 hover:underline" onclick="return confirm('Delete this attendance record?');"><i class="fa fa-trash"></i> Delete</a>
+                                <a href="${pageContext.request.contextPath}/attendance/edit?id=${attendance.attendanceId}"
+                                   class="text-blue-600 hover:underline mr-3"><i class="fa fa-edit"></i> Edit</a>
+                                <a href="${pageContext.request.contextPath}/attendance/delete?id=${attendance.attendanceId}"
+                                   class="text-red-600 hover:underline"
+                                   onclick="return confirm('Delete this attendance record?');"><i
+                                        class="fa fa-trash"></i> Delete</a>
                             </td>
                         </tr>
                     </c:forEach>

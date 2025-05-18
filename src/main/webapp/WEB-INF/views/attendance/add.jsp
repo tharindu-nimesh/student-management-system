@@ -10,21 +10,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 min-h-screen">
-<div class="flex min-h-screen">
+<div class="flex h-screen">
     <%@ include file="/WEB-INF/views/components/sidebar.jsp"%>
+    <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
+        <!-- Top Navbar -->
+        <header class="bg-white shadow">
+            <div class="flex items-center justify-between p-4">
+                <div>
+                    <h1 class="text-xl font-bold">Add Attendance</h1>
+                    <p class="text-sm text-gray-600">Record a new attendance entry</p>
+                </div>
+
+                <div>
+                    <a href="${pageContext.request.contextPath}/attendance" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </header>
+
         <!-- Main Content -->
         <main class="flex-1 p-8">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold">Add Attendance</h1>
-                    <p class="text-gray-500">Record a new attendance entry</p>
-                </div>
-                <a href="${pageContext.request.contextPath}/attendance" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded font-semibold flex items-center">
-                    <i class="fa fa-arrow-left mr-2"></i> Back to List
-                </a>
-            </div>
-
             <div class="bg-white rounded-lg shadow p-6">
                 <form action="${pageContext.request.contextPath}/attendance/add" method="post">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

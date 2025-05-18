@@ -1,5 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,9 +24,10 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-100 min-h-screen">
 <div class="flex h-screen">
-    <%@ include file="/WEB-INF/views/components/sidebar.jsp"%>
+    <%@ include file="/WEB-INF/views/components/sidebar.jsp" %>
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden ml-15 md:ml-50">
         <!-- Top Navbar -->
@@ -47,7 +48,8 @@
                             </button>
                         </form>
                     </div>
-                    <a href="${pageContext.request.contextPath}/students/new" class="bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded-md transition duration-300">
+                    <a href="${pageContext.request.contextPath}/students/new"
+                       class="bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 rounded-md transition duration-300">
                         <i class="fas fa-plus mr-2"></i> Add Student
                     </a>
                 </div>
@@ -72,12 +74,26 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
                     </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -105,13 +121,16 @@
                                         </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="${pageContext.request.contextPath}/students/view?id=${student.studentId}" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                <a href="${pageContext.request.contextPath}/students/view?id=${student.studentId}"
+                                   class="text-indigo-600 hover:text-indigo-900 mr-3">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/students/edit?id=${student.studentId}" class="text-green-600 hover:text-green-900 mr-3">
+                                <a href="${pageContext.request.contextPath}/students/edit?id=${student.studentId}"
+                                   class="text-green-600 hover:text-green-900 mr-3">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="#" onclick="confirmDelete(${student.studentId})" class="text-red-600 hover:text-red-900">
+                                <a href="#" onclick="confirmDelete(${student.studentId})"
+                                   class="text-red-600 hover:text-red-900">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
@@ -136,7 +155,8 @@
         <h3 class="text-lg font-semibold mb-4">Confirm Delete</h3>
         <p class="mb-6">Are you sure you want to delete this student? This action cannot be undone.</p>
         <div class="flex justify-end">
-            <button onclick="hideDeleteModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md mr-3">
+            <button onclick="hideDeleteModal()"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md mr-3">
                 Cancel
             </button>
             <form id="deleteForm" action="${pageContext.request.contextPath}/students/delete" method="post">
