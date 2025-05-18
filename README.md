@@ -114,8 +114,10 @@ See our [Contribution Guidelines](CONTRIBUTING.md) for details.
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
+  <a href="https://github.com/tharindunimesh">
+    <img src="https://img.shields.io/badge/GitHub-tharindunimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
+  </a>
 
-Project Maintainer: [tharindu-nimesh] 
 Issue Tracker: [GitHub Issues](https://github.com/tharindu-nimesh/student-management-system/issues)
 
 ---
