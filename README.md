@@ -87,8 +87,8 @@ cp target/student-management-system.war $TOMCAT_HOME/webapps/
 Visit `http://localhost:8080/student-management-system`
 
 **Default Credentials**  
-- Admin: `admin@nimna.edu` / `Admin@123`  
-- Teacher: `teacher@nimna.edu` / `Teach@123`  
+- Admin: `admin` / `admin123`  
+- Teacher: `teacher` / `teacher123`  
 
 ## 🛡 Security Best Practices
 - BCrypt password hashing
@@ -114,10 +114,19 @@ See our [Contribution Guidelines](CONTRIBUTING.md) for details.
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
+<a href="https://github.com/tharindu-nimesh">
+  <img src="https://img.shields.io/badge/GitHub-tharindu--nimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
+</a><br>
+<a href="https://www.linkedin.com/in/tharindu-in" target="_blank">
+  <img src="https://img.shields.io/badge/LinkedIn-tharindu--in-0A66C2?style=for-the-badge&logo=LinkedIn&logoColor=white" alt="LinkedIn">
+</a>
 
-Project Maintainer: [tharindu-nimesh] 
+
+
+
+
 Issue Tracker: [GitHub Issues](https://github.com/tharindu-nimesh/student-management-system/issues)
 
 ---
 
-**Nimna Institute** © 2024 - Transforming Education Through Technology
+**Nimna Institute** © 2025 - Transforming Education Through Technology

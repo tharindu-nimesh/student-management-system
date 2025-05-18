@@ -76,16 +76,19 @@
     </div>
 
     <!-- User Profile & Logout -->
+    <!-- User Profile & Logout -->
     <div class="relative z-10 px-5 py-5">
         <div class="p-4 bg-indigo-800 bg-opacity-50 rounded-xl mb-4 backdrop-blur-sm">
             <div class="flex items-center">
                 <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-base">
                     <i class="fa fa-user"></i>
                 </div>
-                <div class="ml-3">
-                    <p class="text-white text-sm font-medium">${user.username}</p>
-                    <p class="text-indigo-200 text-xs">Administrator</p>
-                </div>
+                <a href="${pageContext.request.contextPath}/admin/details">
+                    <div class="ml-3">
+                        <p class="text-white text-sm font-medium">${settings.adminName}</p>
+                        <p class="text-indigo-200 text-xs">Administrator</p>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -94,6 +97,7 @@
             <i class="fa fa-sign-out-alt mr-2"></i> Log Out
         </a>
     </div>
+
 
     <style>
         @keyframes pulse-slow {
