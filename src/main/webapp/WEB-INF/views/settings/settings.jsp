@@ -29,7 +29,7 @@
                     <input type="hidden" name="action" value="updateProfile" />
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Name</label>
+                        <label class="block text-sm font-medium text-gray-700">User Name</label>
                         <input type="text" name="adminName" value="${settings.adminName}" class="mt-1 block w-full px-3 sm:px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base transition duration-150" required>
                     </div>
 
