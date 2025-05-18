@@ -114,9 +114,16 @@ See our [Contribution Guidelines](CONTRIBUTING.md) for details.
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
-  <a href="https://github.com/tharindunimesh">
-    <img src="https://img.shields.io/badge/GitHub-tharindu-nimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
-  </a>
+<a href="https://github.com/tharindu-nimesh">
+  <img src="https://img.shields.io/badge/GitHub-tharindu--nimesh-181717?style=for-the-badge&logo=github" alt="GitHub">
+</a><br>
+<a href="https://www.linkedin.com/in/tharindu-in" target="_blank">
+  <img src="https://img.shields.io/badge/LinkedIn-tharindu--in-0A66C2?style=for-the-badge&logo=LinkedIn&logoColor=white" alt="LinkedIn">
+</a>
+
+
+
+
 
 Issue Tracker: [GitHub Issues](https://github.com/tharindu-nimesh/student-management-system/issues)
 
