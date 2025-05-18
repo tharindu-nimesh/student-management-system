@@ -120,4 +120,4 @@ Issue Tracker: [GitHub Issues](https://github.com/tharindu-nimesh/student-manage
 
 ---
 
-**Nimna Institute** © 2024 - Transforming Education Through Technology
+**Nimna Institute** © 2025 - Transforming Education Through Technology
