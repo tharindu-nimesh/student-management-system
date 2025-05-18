@@ -83,7 +83,7 @@
                     <i class="fa fa-user"></i>
                 </div>
                 <div class="ml-3">
-                    <p class="text-white text-sm font-medium">Admin User</p>
+                    <p class="text-white text-sm font-medium">${user.username}</p>
                     <p class="text-indigo-200 text-xs">Administrator</p>
                 </div>
             </div>
